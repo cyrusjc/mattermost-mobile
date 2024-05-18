@@ -10,12 +10,12 @@ import {getCurrentChannelId, getCurrentUserId} from '@queries/servers/system';
 import {getEmojiFirstAlias} from '@utils/emoji/helpers';
 import {getFullErrorMessage} from '@utils/errors';
 import {logDebug} from '@utils/log';
+import {isSystemMessage} from '@utils/post';
 
 import {forceLogoutIfNecessary} from './session';
 
 import type {Model} from '@nozbe/watermelondb';
 import type PostModel from '@typings/database/models/servers/post';
-import { isSystemMessage } from '@utils/post';
 
 export async function getIsReactionAlreadyAddedToPost(serverUrl: string, postId: string, emojiName: string) {
     try {
@@ -127,19 +127,18 @@ export const handleReactionToLatestPost = async (serverUrl: string, emojiName: s
             const channelId = await getCurrentChannelId(database);
             posts = await getRecentPostsInChannel(database, channelId);
         }
-        const latestRegularUserPost = posts.find(post => !isSystemMessage(post));
+        const latestRegularUserPost = posts.find((post) => !isSystemMessage(post));
         if (!latestRegularUserPost) {
-            return { error: 'No regular user posts found in the thread.' };
+            return {error: 'No regular user posts found in the thread.'};
         }
-            
+
         if (add) {
             return addReaction(serverUrl, latestRegularUserPost.id, emojiName);
         }
-            
-        return removeReaction(serverUrl, latestRegularUserPost.id, emojiName);
 
+        return removeReaction(serverUrl, latestRegularUserPost.id, emojiName);
     } catch (error) {
-        return { error };
+        return {error};
     }
 };
 
